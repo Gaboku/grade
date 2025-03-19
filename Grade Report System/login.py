@@ -1,5 +1,5 @@
-import os  # Import os to access environment variables
-from PySide6.QtWidgets import QMainWindow, QApplication, QLabel, QLineEdit, QPushButton, QVBoxLayout, QWidget
+import os
+from PySide6.QtWidgets import QMainWindow, QLabel, QLineEdit, QPushButton, QVBoxLayout, QWidget
 from utils import center
 from pymongo import MongoClient
 

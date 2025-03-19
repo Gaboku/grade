@@ -1,6 +1,6 @@
 import sys
-import os  # Import os to access environment variables
-from PySide6.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QLabel, QListWidget, QListWidgetItem
+import os
+from PySide6.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QLabel, QListWidget, QListWidgetItem, QInputDialog
 from pymongo import MongoClient
 from utils import center
 import login
@@ -12,7 +12,6 @@ class ClassroomWindow(QMainWindow):
         self.setGeometry(0, 0, 600, 400)
         center(self)
 
-        # Use environment variable for MongoDB connection string
         mongo_uri = os.getenv("MONGODB_URI")
         if not mongo_uri:
             raise ValueError("MONGODB_URI environment variable not set")
@@ -24,12 +23,15 @@ class ClassroomWindow(QMainWindow):
 
     def initUI(self):
         layout = QVBoxLayout()
-
         self.title_label = QLabel("My Subjects and Sections", self)
         layout.addWidget(self.title_label)
 
         self.subjects_list = QListWidget(self)
         layout.addWidget(self.subjects_list)
+
+        self.add_subject_button = QPushButton("Add Subject", self)  # Add button
+        self.add_subject_button.clicked.connect(self.add_subject)
+        layout.addWidget(self.add_subject_button)
 
         self.load_subjects()
 
@@ -42,6 +44,23 @@ class ClassroomWindow(QMainWindow):
         for subject in subjects:
             item = QListWidgetItem(f"{subject['name']} - {subject['section']}")
             self.subjects_list.addItem(item)
+
+    def add_subject(self):
+        name, ok_name = QInputDialog.getText(self, "Add Subject", "Enter subject name:")
+        if not ok_name or not name.strip():
+            return
+
+        section, ok_section = QInputDialog.getText(self, "Add Subject", "Enter section:")
+        if not ok_section or not section.strip():
+            return
+
+        subject = {"name": name.strip(), "section": section.strip()}
+        self.subjects_collection.insert_one(subject)  # Add to database
+
+        # Ensure the new subject is added to the subjects_list
+        item = QListWidgetItem(f"{subject['name']} - {subject['section']}")
+        self.subjects_list.addItem(item)
+        self.subjects_list.repaint()  # Force the list to refresh
 
 class MainWindow(QMainWindow):
     def __init__(self):
