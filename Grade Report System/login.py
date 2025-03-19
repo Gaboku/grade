@@ -1,3 +1,4 @@
+import os  # Import os to access environment variables
 from PySide6.QtWidgets import QMainWindow, QApplication, QLabel, QLineEdit, QPushButton, QVBoxLayout, QWidget
 from utils import center
 from pymongo import MongoClient
@@ -10,7 +11,10 @@ class LoginWindow(QMainWindow):
         center(self)
 
         self.initUI()
-        self.client = MongoClient("mongodb+srv://Gaboku:7oNQ15FbmFhpMGqI@gradereportcluster.onbdj.mongodb.net/")
+        mongo_uri = os.getenv("MONGODB_URI")
+        if not mongo_uri:
+            raise ValueError("MONGODB_URI environment variable not set")
+        self.client = MongoClient(mongo_uri)
         self.db = self.client["grade_report_system"]
         self.users_collection = self.db["user"]
 
